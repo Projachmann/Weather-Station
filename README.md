@@ -1,2 +1,2 @@
 # Weather-Station
-Weather Station with sensor that is connected to a Website on your network.
+A weather station equipped with a sensor, seamlessly integrated with a website accessible over your local network.
