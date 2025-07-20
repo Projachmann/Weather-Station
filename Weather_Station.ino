@@ -19,6 +19,10 @@ float outsideTemperature;
 float humidity;
 float heatIndex;
 
+int yellow = 2;
+int green = 15;
+int red = 14;
+
 /* Sensor for indoor temperature and air pressure */
 Adafruit_BMP280 bmp;
 #define SEALEVELPRESSURE_HPA (1013.25)
@@ -26,6 +30,7 @@ Adafruit_BMP280 bmp;
 float indoorTemperature;
 float pressure;
 float altitude;
+float previousPressure = 0;
 
 //Servo
 Servo servo;
@@ -34,8 +39,10 @@ Servo servo;
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 const long dataReadInterval = 5000;
 const long humidityInterval = 10000;
+const long pressureInterval = 30000;
 unsigned long previousDataReadTime = 0;
 unsigned long previousHumidiyTime = 0;
+unsigned long previousPressureTime = 0;
 
 // Variables for text output on the display
 String line1Text;
@@ -118,6 +125,28 @@ void loop() {
     Serial.println(humidity);
     previousHumidiyTime = currentTime;
     servo.write(int(humidity*1.8));
+  }
+  
+  if (currentTime - previousPressureTime >= pressureInterval) {
+    readSensorData();
+    previousPressureTime = currentTime;
+
+    if (pressure - previousPressure >= 0.5) {
+      digitalWrite(green, HIGH);
+      digitalWrite(yellow, LOW);
+      digitalWrite(red, LOW);
+    } else {
+      if (pressure - previousPressure > -0.5) {
+        digitalWrite(green, LOW);
+        digitalWrite(yellow, HIGH);
+        digitalWrite(red, LOW);
+      } else {
+        digitalWrite(green, LOW);
+        digitalWrite(yellow, LOW);
+        digitalWrite(red, HIGH);
+      }
+    }
+    previousPressure = pressure;
   }
 }
                                                                         
@@ -264,4 +293,3 @@ String SendHTML(float indoorTemperature,float outsideTemperature, float humidity
   ptr += "</html>";
   return ptr;
 }
-
